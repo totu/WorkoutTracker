@@ -151,6 +151,7 @@
                                     // enable rest timer
                                     restTimer.setAttribute('data-sec', 0)
                                     restTimer.classList.remove('hidden');
+                                    progress.classList.remove('hidden');
                                     rest = true;
 
                                     // increase set count
@@ -273,11 +274,21 @@
             // make banner work as "back" button
             banner.addEventListener('click', function(event)
             {
+                //disable timers
                 clearInterval(timerInterval);
                 timerInterval = null;
                 timer.classList.add('hidden');
                 timer.innerHTML = "0:00";
                 timer.setAttribute('data-sec', 0);
+                //hide progressbar
+                progress.classList.add('hidden');
+                progress.style.width = '0%';
+                //hide rest timer
+                restTimer.classList.add('hidden');
+                restTimer.innerHTML = "2:00";
+                restTimer.setAttribute('data-sec', 0)
+                rest = false;
+                //reset view to start
                 start();
             }, false);
             })();
