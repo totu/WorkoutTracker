@@ -45,6 +45,20 @@
                 border-bottom: 1px solid black;
             }
 
+            div#timer, div#restTimer{
+                color: white;
+                padding-top: 8px;
+                padding-left: 14px;
+                font-size: 20px;
+                display: inline-block;
+                font-weight: 650;
+                -webkit-text-stroke: 1px black;
+            }
+            div#restTimer{
+                color: rgb(0, 182, 70);
+                position: absolute;
+                right: 10px;
+            }
             div#main, span.sets{
                 background-color: rgb(211, 211, 211);
             }
@@ -65,16 +79,41 @@
             div.exe {
                 padding: 0px;
             }
+            div#bar {
+                z-index: -1;
+                width: 100%;
+                position: relative;
+                top: -34px;
+            }
+            div#progress {
+                width: 0%;
+                height: 43px;
+                background: rgb(0, 182, 70);
+            }
+            .hidden {
+                display: none;
+            }
         </style>
     </head>
 
     <body>
         <div id='banner'>Workouts</div>
         <div id='main'></div>
+        <div id='timer' class='hidden' data-sec='0'>0:00</div>
+        <div id='restTimer' class='hidden' data-sec='0'>2:00</div>
+        <div id='bar'>
+            <div id='progress'></div>
+        </div>
         <script>
             (function(){
+                const timer = document.getElementById("timer");
+                const restTimer = document.getElementById("restTimer");
                 const banner = document.getElementById("banner");
                 const main = document.getElementById("main");
+                const progress = document.getElementById("progress");
+                let timerInterval = null;
+                let rest = false;
+                let restStart = 0;
                 const print = function(s){console.log(s);}
 
                 const view = function(data, focus)
@@ -108,9 +147,16 @@
                                 child = main.children[i];
                                 child.addEventListener('click', function(event)
                                 {
+                                    // enable rest timer
+                                    restTimer.setAttribute('data-sec', 0)
+                                    restTimer.classList.remove('hidden');
+                                    rest = true;
+
+                                    // increase set count
                                     sets = this.children[2];
                                     count = sets.innerHTML * 1.0;
                                     sets.innerHTML = ++count;
+                                    // disable sets after X
                                     if (count == 1)
                                     {
                                         new_element = this.cloneNode(true)
@@ -121,6 +167,57 @@
                             }
                         }
                     }
+
+                    // handle clocks
+                    run_timer();
+                }
+
+                const time_format = function(ellapsed)
+                {
+                    min = Math.floor(ellapsed / 60);
+                    sec = ellapsed - (min * 60);
+                    if (sec < 10)
+                        sec = "0" + sec;
+                    html = min + ":" + sec;
+                    return html;
+                }
+
+                const run_timer = function()
+                {
+                    timer.classList.remove('hidden');
+                    timerInterval = setInterval(function()
+                    {
+                        // handle workout duration timer
+                        ellapsed = timer.getAttribute('data-sec') * 1.0
+                        timer.setAttribute('data-sec', ++ellapsed)
+                        html = time_format(ellapsed);
+                        timer.innerHTML = html;
+
+                        if (rest) {
+                            // handle rest timer
+                            restTime = 20
+                            restEllapsed = restTimer.getAttribute('data-sec') * 1.0
+                            restTimer.setAttribute('data-sec', ++restEllapsed)
+                            restLeft = restTime - restEllapsed;
+                            html = time_format(restLeft);
+                            restTimer.innerHTML = html;
+
+                            // progressbar
+                            percentage = 100 / restTime;
+                            width = restEllapsed * percentage;
+                            progress.style.width = width + '%';
+
+                            // if no rest left hide and reset rest timer
+                            if (restLeft < 0) {
+                                progress.style.width = '0%';
+                                restTimer.classList.add('hidden');
+                                restTimer.innerHTML = "2:00";
+                                restTimer.setAttribute('data-sec', 0)
+                                rest = false;
+                            }
+                        }
+                    }
+                    ,1000)
                 }
 
                 const parse_workouts = function(data)
@@ -175,6 +272,11 @@
             // make banner work as "back" button
             banner.addEventListener('click', function(event)
             {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                timer.classList.add('hidden');
+                timer.innerHTML = "0:00";
+                timer.setAttribute('data-sec', 0);
                 start();
             }, false);
             })();
