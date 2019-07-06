@@ -42,7 +42,6 @@
                 padding-left: 18px;
                 padding-right: 0px;
                 border-left: 1px solid black;
-                border-bottom: 1px solid black;
             }
 
             div#timer, div#restTimer{
@@ -92,7 +91,7 @@
                 transition: width 1s linear;
             }
             div.hidden {
-                display: none !important;
+                visibility: hidden !important;
             }
         </style>
     </head>
@@ -100,8 +99,8 @@
     <body>
         <div id='banner'>Workouts</div>
         <div id='main'></div>
-        <div id='timer' class='hidden' data-sec='0'>0:00</div>
-        <div id='restTimer' class='hidden' data-sec='0'>2:00</div>
+        <div id='timer' class='hidden' data-start='-1' data-sec='0'>0:00</div>
+        <div id='restTimer' class='hidden' data-start='-1' data-sec='0'>2:00</div>
         <div id='bar'>
             <div id='progress'></div>
         </div>
@@ -117,6 +116,11 @@
                 let restStart = 0;
                 const print = function(s){console.log(s);}
 
+                const get_current_time = function()
+                {
+                    return Math.floor(new Date().getTime() / 1000)
+                }
+
                 const view = function(data, focus)
                 {
                     // set banner to days focus and clear UI
@@ -130,14 +134,13 @@
                         {
                             // clear old buttons and make new ones
                             html = ""
-                            for (var j=0; j<data[i].execrcises.length; j++)
+                            for (var j=0; j<data[i].exercises.length; j++)
                             {
-                               exe = data[i].execrcises[j];
-                               html += "<div class='exe' data-vid='";
-                               html += exe.vid + "'>";
-                               html += "<span class='kg'>" + exe.max + "</span>";
+                               exe = data[i].exercises[j];
+                               html += "<div class='exe'>";
+                               html += "<span class='kg'>" + exe.kg + "</span>";
                                html += "<span class='name'>" + exe.name + "</span>";
-                               html += "<span class='sets'>" + 0 + "</span>";
+                               html += "<span class='sets' data-sets='" + exe.sets + "'>" + 0 + "</span>";
                                html += "</div>"
                             }
                             main.innerHTML = html;
@@ -148,6 +151,7 @@
                                 child = main.children[i];
                                 child.addEventListener('click', function(event)
                                 {
+                                    event.preventDefault();
                                     // enable rest timer
                                     restTimer.setAttribute('data-sec', 0)
                                     restTimer.classList.remove('hidden');
@@ -156,10 +160,11 @@
 
                                     // increase set count
                                     sets = this.children[2];
+                                    totalSets = sets.getAttribute('data-sets')
                                     count = sets.innerHTML * 1.0;
                                     sets.innerHTML = ++count;
                                     // disable sets after X
-                                    if (count == 1)
+                                    if (count == totalSets)
                                     {
                                         new_element = this.cloneNode(true)
                                         new_element.classList.add('done');
@@ -186,27 +191,40 @@
 
                 const run_timer = function()
                 {
+                    startTime = timer.getAttribute('data-start')
+                    if (startTime == -1)
+                    {
+                        startTime = get_current_time();
+                        timer.setAttribute('data-start', startTime);
+                    }
+                    timer.innerHTML = time_format(get_current_time() - timer.getAttribute('data-start'));
                     timer.classList.remove('hidden');
                     timerInterval = setInterval(function()
                     {
                         // handle workout duration timer
-                        ellapsed = timer.getAttribute('data-sec') * 1.0
-                        timer.setAttribute('data-sec', ++ellapsed)
-                        html = time_format(ellapsed);
+                        now = get_current_time() - startTime
+                        timer.setAttribute('data-sec', now)
+                        html = time_format(now);
                         timer.innerHTML = html;
 
                         if (rest) {
                             // handle rest timer
-                            restTime = 120
-                            restEllapsed = restTimer.getAttribute('data-sec') * 1.0
-                            restTimer.setAttribute('data-sec', ++restEllapsed)
-                            restLeft = restTime - restEllapsed;
+                            restStartTime = restTimer.getAttribute('data-start')
+                            if (restStartTime == -1)
+                            {
+                                restStartTime = get_current_time();
+                                restTimer.setAttribute('data-start', restStartTime);
+                            }
+                            restNow = get_current_time() - restStartTime
+                            restTimer.setAttribute('data-sec', restNow)
+                            restTime = 5
+                            restLeft = restTime - restNow;
                             html = time_format(restLeft);
                             restTimer.innerHTML = html;
 
                             // progressbar
                             percentage = 100 / restTime;
-                            width = restEllapsed * percentage;
+                            width = restNow * percentage;
                             progress.style.width = width + '%';
 
                             // if no rest left hide and reset rest timer
@@ -215,6 +233,7 @@
                                 restTimer.classList.add('hidden');
                                 restTimer.innerHTML = "2:00";
                                 restTimer.setAttribute('data-sec', 0)
+                                restTimer.setAttribute('data-start', -1)
                                 rest = false;
                             }
                         }
@@ -265,7 +284,7 @@
                             console.log(xhr.status);
                         }
                     }
-                    xhr.open('GET', 'workouts.json');
+                    xhr.open('GET', 'week1.json');
                     xhr.send();
                 }
 

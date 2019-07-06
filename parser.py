@@ -1,39 +1,62 @@
 #!/bin/env python3
-
 import json
 
+def get_focus(day):
+    day = int(day.split(" ")[1].split(":")[0])
+    if day == 1:
+        return "Chest"
+    elif day == 2:
+        return "Quads"
+    elif day == 3:
+        return "Back"
+    elif day == 4:
+        return "Glute & Ham"
+    elif day == 5:
+        return "Shoulders & Arms"
+    else:
+        return "Nothing..."
+
 workouts = []
-with open("parse-me.txt", "r") as file:
+with open("week1.txt", "r") as file:
     workout = []
+    day = None
     for line in file.readlines():
-        if len(line) == 1:
-            workouts.append(workout)
-            workout = []
+        if line.startswith("Week") or line.startswith("Exercise"):
             continue
-        workout.append(line.rstrip().split("\t"))
+        if line.startswith("Day"):
+            if day:
+                workouts.append(workout)
+                workout = []
+            day = line.rstrip()
+            continue
+        l = line.rstrip().split("\t")
+        l.append(day)
+        workout.append(l)
     workouts.append(workout)
 
 ex = []
 
 for workout in workouts:
-    focus = workout[0][0]
-    day = int(workout[0][1].split(" ")[1].split(":")[0])
-    excercises = []
-    for excercise in workout[1:]:
-        e_type = excercise[0]
-        e_name = excercise[1]
-        e_vid_url = excercise[3]
-        e_10RM = excercise[5]
-        e = '{"type":"%s", "name":"%s", "vid":"%s", "max":"%s"}' % (e_type, e_name, e_vid_url, e_10RM)
-        excercises.append(e)
-    title = '{"focus":"%s", "execrcises":[%s]}' % (focus, ",".join(excercises))
+    exercises = []
+    for exercise in workout:
+        name = exercise[0]
+        _set = exercise[1]
+        kg = exercise[2]
+        reps = exercise[3]
+        day = exercise[4]
+        focus = get_focus(day)
+        e = '{"name":"%s", "kg":"%s", "sets":"%s"}' % (name, kg, _set)
+        exercises.append(e)
+    title = '{"focus":"%s", "exercises":[%s]}' % (focus, ",".join(exercises))
     ex.append(title)
+
 
 x = '{"workouts": ['
 x += ",".join(ex)
 x += ']}'
 
-f = open("workouts.json", "w")
+f = open("week1.json", "w")
 f.write(x)
 f.close()
+print(x)
 
