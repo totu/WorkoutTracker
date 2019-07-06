@@ -16,7 +16,7 @@
             div.workout {
                 background: rgb(43, 101, 134) !important;
             }
-            div.done {
+            .done {
                 background: rgb(0, 182, 70);
             }
             span.kg {
@@ -33,10 +33,9 @@
             }
             span.sets {
                 position: absolute;
-                z-index: 10;
                 right: 0px;
                 width: 30px;
-                height: 32px;
+                height: 31px;
                 padding-right: 0px;
                 padding-top: 10px;
                 padding-left: 18px;
@@ -58,7 +57,7 @@
                 position: absolute;
                 right: 10px;
             }
-            div#main, span.sets{
+            div#main {
                 background-color: rgb(211, 211, 211);
             }
             div#banner {
@@ -166,9 +165,13 @@
                                     // disable sets after X
                                     if (count == totalSets)
                                     {
-                                        new_element = this.cloneNode(true)
+                                        new_set = sets.cloneNode(true);
+                                        new_set.classList.add('done');
+                                        this.replaceChild(new_set, sets);
+
+                                        new_element = this.cloneNode(true);
                                         new_element.classList.add('done');
-                                        this.parentNode.replaceChild(new_element, this)
+                                        this.parentNode.replaceChild(new_element, this);
                                     }
                                 }, false);
                             }
@@ -191,6 +194,7 @@
 
                 const run_timer = function()
                 {
+                    // If we had timer already running show it all pretty
                     startTime = timer.getAttribute('data-start')
                     if (startTime == -1)
                     {
@@ -199,6 +203,8 @@
                     }
                     timer.innerHTML = time_format(get_current_time() - timer.getAttribute('data-start'));
                     timer.classList.remove('hidden');
+                    // That was just pure candy to make it look nice
+
                     timerInterval = setInterval(function()
                     {
                         // handle workout duration timer
@@ -208,6 +214,10 @@
                         timer.innerHTML = html;
 
                         if (rest) {
+                            // Show timer and bar
+                            restTimer.setAttribute('data-sec', 0)
+                            restTimer.classList.remove('hidden');
+                            progress.classList.remove('hidden');
                             // handle rest timer
                             restStartTime = restTimer.getAttribute('data-start')
                             if (restStartTime == -1)
@@ -217,7 +227,7 @@
                             }
                             restNow = get_current_time() - restStartTime
                             restTimer.setAttribute('data-sec', restNow)
-                            restTime = 5
+                            restTime = 120
                             restLeft = restTime - restNow;
                             html = time_format(restLeft);
                             restTimer.innerHTML = html;
@@ -306,7 +316,6 @@
                 restTimer.classList.add('hidden');
                 restTimer.innerHTML = "2:00";
                 restTimer.setAttribute('data-sec', 0)
-                rest = false;
                 //reset view to start
                 start();
             }, false);
