@@ -17,7 +17,7 @@ def get_focus(day):
         return "Nothing..."
 
 workouts = []
-with open("week1.txt", "r") as file:
+with open("week2.txt", "r") as file:
     workout = []
     day = None
     for line in file.readlines():
