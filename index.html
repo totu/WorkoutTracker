@@ -33,7 +33,7 @@
             }
             span.sets {
                 position: absolute;
-                right: 0px;
+                right: 8px;
                 width: 30px;
                 height: 31px;
                 padding-right: 0px;
@@ -98,6 +98,15 @@
             div.hidden {
                 visibility: hidden !important;
             }
+            .last_click {
+                background: rgb(167, 167, 167);
+            }
+            .compoundBG {
+                background: rgb(104, 0, 202) !important;
+            }
+            .compoundColor {
+                color: rgb(104, 0, 202) !important;
+            }
         </style>
     </head>
 
@@ -121,6 +130,7 @@
                 let timerInterval = null;
                 let rest = false;
                 let restStart = 0;
+                let restTime = 2*60;
                 const print = function(s){console.log(s);}
 
                 const get_current_time = function()
@@ -147,7 +157,7 @@
                                html += "<div class='exe'>";
                                html += "<span class='kg'>" + exe.kg + "</span>";
                                html += "<span class='name'>" + exe.name + "</span>";
-                               html += "<span class='sets' data-sets='" + exe.sets + "'>" + 0 + "</span>";
+                               html += "<span class='sets' data-sets='" + exe.sets + "'>" + 0 + "/" + exe.sets + "</span>";
                                html += "</div>"
                             }
                             main.innerHTML = html;
@@ -159,6 +169,12 @@
                                 child.addEventListener('click', function(event)
                                 {
                                     event.preventDefault();
+                                    for (var j=0; j<main.childElementCount; j++)
+                                    {
+                                        main.children[j].classList.remove('last_click');
+                                    }
+                                    this.classList.add('last_click');
+
                                     // enable rest timer
                                     restTimer.setAttribute('data-sec', 0)
                                     restTimer.classList.remove('hidden');
@@ -166,18 +182,19 @@
                                     rest = true;
 
                                     // increase set count
-                                    sets = this.children[2];
-                                    totalSets = sets.getAttribute('data-sets')
-                                    count = sets.innerHTML * 1.0;
-                                    sets.innerHTML = ++count;
+                                    let sets = this.children[2];
+                                    let totalSets = sets.getAttribute('data-sets')
+                                    let count = sets.innerHTML.split("/")[0] * 1.0;
+                                    sets.innerHTML = ++count + "/" + totalSets;
                                     // disable sets after X
                                     if (count == totalSets)
                                     {
-                                        new_set = sets.cloneNode(true);
+                                        let new_set = sets.cloneNode(true);
                                         new_set.classList.add('done');
+                                        this.classList.remove('last_click');
                                         this.replaceChild(new_set, sets);
 
-                                        new_element = this.cloneNode(true);
+                                        let new_element = this.cloneNode(true);
                                         new_element.classList.add('done');
                                         this.parentNode.replaceChild(new_element, this);
                                     }
@@ -235,7 +252,6 @@
                             }
                             restNow = get_current_time() - restStartTime
                             restTimer.setAttribute('data-sec', restNow)
-                            restTime = 120
                             restLeft = restTime - restNow;
                             html = time_format(restLeft);
                             restTimer.innerHTML = html;
@@ -253,6 +269,9 @@
                                 restTimer.setAttribute('data-sec', 0)
                                 restTimer.setAttribute('data-start', -1)
                                 rest = false;
+                                restTime = 2*60;
+                                progress.classList.remove('compoundBG');
+                                restTimer.classList.remove('compoundColor');
                             }
                         }
                     }
@@ -265,7 +284,6 @@
                     banner.innerHTML = "Week " + week + ": Workouts"
                     banner.classList.remove('workout');
                     // Create buttons for each focus (workout)
-                    console.log(data)
                     for (var i=0; i<data.length; i++)
                     {
                         workout = data[i];
@@ -310,7 +328,6 @@
                     xhr.onload = function()
                     {
                         if (xhr.status >= 200 && xhr.status < 300) {
-                            console.log("success!");
                             data = JSON.parse(xhr.responseText);
                             main.innerHTML = "";
                             parse_workouts(data.workouts);
@@ -325,7 +342,6 @@
 
                 const start = function()
                 {
-                    console.log(week);
                     if (week == null)
                     {
                         main.innerHTML = "";
@@ -364,6 +380,7 @@
             // make banner work as "back" button
             banner.addEventListener('click', function(event)
             {
+                event.preventDefault();
                 //disable timers
                 clearInterval(timerInterval);
                 timerInterval = null;
@@ -380,6 +397,13 @@
                 //reset view to start
                 start();
             }, false);
+
+            restTimer.addEventListener("click", function(event) {
+                event.preventDefault();
+                restTime = 5*60;
+                progress.classList.add('compoundBG');
+                restTimer.classList.add('compoundColor');
+            },false);
             })();
         </script>
     </body>
