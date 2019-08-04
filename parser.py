@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-WORKOUT_FILES = ["week1.txt", "week2.txt", "week3.txt", "week4.txt"]
+WORKOUT_FILES = ["week1.txt", "week2.txt", "week3.txt", "week4.txt", "week5.txt"]
 
 def get_focus(day):
     day = int(day.split(" ")[1].split(":")[0])
