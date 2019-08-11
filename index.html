@@ -120,8 +120,12 @@
         </div>
         <script>
             (function(){
-                let week = null;
                 let resp = null;
+                var options = { 'cycle': null, 'week': null };
+                var opts = JSON.parse(localStorage.getItem('options'));
+                if (opts != null) {
+                    options = JSON.parse(localStorage.getItem('options'));
+                }
                 const timer = document.getElementById("timer");
                 const restTimer = document.getElementById("restTimer");
                 const banner = document.getElementById("banner");
@@ -141,7 +145,7 @@
                 const view = function(data, focus)
                 {
                     // set banner to days focus and clear UI
-                    banner.innerHTML = "Week " + week + ": " + focus + " (" + reps + ")";
+                    banner.innerHTML = "Week " + options.week + ": " + focus + " (" + reps + ")";
                     banner.classList.add('workout');
                     main.innerHTML = "";
                     // find which focus was selected
@@ -280,8 +284,9 @@
 
                 const parse_workouts = function(data)
                 {
+                    console.log(options)
                     // set banner to default
-                    banner.innerHTML = "Week " + week + ": Workouts"
+                    banner.innerHTML = "Week " + options.week + ": Workouts"
                     banner.classList.remove('workout');
                     // Create buttons for each focus (workout)
                     for (var i=0; i<data.length; i++)
@@ -309,8 +314,9 @@
                         {
                             if (this.getAttribute('data-back'))
                             {
-                                week = null;
-                                start();
+                                options.week = null;
+                                localStorage.setItem('options', JSON.stringify(options));
+                                change_week();
                             }
                             else
                             {
@@ -321,8 +327,9 @@
                     }
                 }
 
-                const load_workout = function(workout)
+                const load_workout = function()
                 {
+                    console.log(options)
                     // Get workouts.json and call renderer
                     var xhr = new XMLHttpRequest();
                     xhr.onload = function()
@@ -336,13 +343,62 @@
                             console.log(xhr.status);
                         }
                     }
-                    xhr.open('GET', 'week' + workout + '.json');
+                    xhr.open('GET', 'cycle' + options.cycle + '/json/week' + options.week + '.json');
                     xhr.send();
                 }
 
                 const start = function()
                 {
-                    if (week == null)
+                    print("start")
+                    if (options.cycle == null)
+                    {
+                        main.innerHTML = "";
+                        banner.innerHTML = "Cycles";
+                        banner.classList.remove('workout');
+                        // Create buttons for each focus (workout)
+                        const cycles = [1, 2];
+                        for (var i=0; i<cycles.length; i++)
+                        {
+                            switch(cycles[i])
+                            {
+                                case 1:
+                                    focus = "Hypertrophy";
+                                    break;
+                                case 2:
+                                    focus = "Metabolite";
+                                    break;
+                                case 3:
+                                    focus = "Resentization";
+                                    break;
+                            }
+                            html = "<div data-cycle='";
+                            html += cycles[i];
+                            html += "' class='focus'>";
+                            html += focus + "cycle";
+                            html += "</div>";
+                            main.innerHTML += html;
+                        }
+                        // hook buttons
+                        for (var i=0; i<main.childElementCount; i++)
+                        {
+                            child = main.children[i];
+                            child.addEventListener('click', function(event)
+                            {
+                                options.cycle = this.getAttribute('data-cycle');
+                                localStorage.setItem('options', JSON.stringify(options));
+                                change_week();
+                            }, false);
+                        }
+                    }
+                    else
+                    {
+                        change_week();
+                    }
+                }
+
+                const change_week = function()
+                {
+                    if (options.week == null)
                     {
                         main.innerHTML = "";
                         banner.innerHTML = "Weeks";
@@ -358,25 +414,41 @@
                             html += "</div>";
                             main.innerHTML += html;
                         }
+                        main.innerHTML += "<div id='cycle_back' class='back' data-back=True>Change cycle</div>";
+                        let cycle_back = document.getElementById('cycle_back');
+                        cycle_back.style.width = main.offsetWidth - 30 + "px";
+
                         // hook buttons
                         for (var i=0; i<main.childElementCount; i++)
                         {
                             child = main.children[i];
                             child.addEventListener('click', function(event)
                             {
-                                week = this.getAttribute('data-week');
-                                load_workout(week);
+                                if (this.getAttribute('data-back'))
+                                {
+                                    options.cycle = null;
+                                    localStorage.setItem('options', JSON.stringify(options));
+                                    start();
+                                }
+                                else
+                                {
+                                    options.week = this.getAttribute('data-week');
+                                    localStorage.setItem('options', JSON.stringify(options));
+                                    load_workout();
+                                }
                             }, false);
                         }
                     }
                     else
                     {
-                        load_workout(week);
+                        load_workout();
                     }
                 }
 
-            // Actual onload
+
             start();
+            print(options)
+
             // make banner work as "back" button
             banner.addEventListener('click', function(event)
             {

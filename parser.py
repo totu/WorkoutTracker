@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-
-WORKOUT_FILES = ["week1.txt", "week2.txt", "week3.txt", "week4.txt", "week5.txt"]
+from os import listdir
+from os.path import isdir, isfile, join
 
 def get_focus(day):
     day = int(day.split(" ")[1].split(":")[0])
@@ -52,20 +52,27 @@ def parse_workout(workout_file):
         title = '{"focus":"%s", "exercises":[%s], "reps":"%s"}' % (focus, ",".join(exercises), reps)
         ex.append(title)
 
-
     x = '{"workouts": ['
     x += ",".join(ex)
     x += ']}'
 
-    json = workout_file.replace(".txt", ".json")
-    f = open(json, "w")
-    f.write(x)
+    return x
+
+def write_to_file(file_name, content):
+    f = open(file_name, "w")
+    f.write(content)
     f.close()
 
 def main():
-    for workout_file in WORKOUT_FILES:
-        print("parsing: %s" % workout_file)
-        parse_workout(workout_file)
+    cycles = [d for d in listdir(".") if isdir(join(".", d)) and d.startswith("cycle")]
+    for cycle in cycles:
+        print("parsing %s" % cycle)
+        workouts = ["%s/%s" % (cycle, f) for f in listdir(cycle) if isfile(join(cycle, f))]
+        for workout in workouts:
+            print("  workout : %s" % workout)
+            parsed_workout = parse_workout(workout)
+            file_name = "%s/json/%s" % (cycle, workout.split("/")[1].replace(".txt", ".json"))
+            write_to_file(file_name, parsed_workout)
     print("done")
 
 if __name__ == "__main__":

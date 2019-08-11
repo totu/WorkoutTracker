@@ -1,0 +1,42 @@
+Week 1					
+Exercise	Sets	Weight	Rep Goal	Rep Results	*Rating
+Day 1:					
+Incline Medium Grip Bench Press	4	55	3/fail		
+Machine Chest Flye	3	75	3/fail		
+Flat Machine Bench Press	3	50	3/fail		
+Medium Grip Bench Press	2	60	3/fail		
+Row Machine	3	75	3/fail		
+Cable Upright Row	3	25	3/fail		
+Week 1					
+Exercise	Sets	Weight	Rep Goal	Rep Results	*Rating
+Day 2:					
+Hack Squat	4	45	3/fail		
+Leg Press	4	105	3/fail		
+Lying Leg Curl	4	40	3/fail		
+Week 1					
+Exercise	Sets	Weight	Rep Goal	Rep Results	*Rating
+Day 3:					
+Wide-Grip Pulldown	4	50	3/fail		
+Narrow Grip Pulldown	4	50	3/fail		
+Row Machine	3	75	3/fail		
+Flat Machine Bench Press	3	55	3/fail		
+Dumbbell Side Lateral Raise	3	15	3/fail		
+Cable Facepull	3	25	3/fail		
+Week 1					
+Exercise	Sets	Weight	Rep Goal	Rep Results	*Rating
+Day 4:					
+Deadlift	4	75	3/fail		
+Sumo Deadlift	4	75	3/fail		
+Stiff-Legged Deadlift	4	45	3/fail		
+Front Squat 	4	30	3/fail		
+Week 1					
+Exercise	Sets	Weight	Rep Goal	Rep Results	*Rating
+Day 5:					
+Alternating Dumbbell Curl	4	30	3/fail		
+Incline Dumbbell Curl	4	20	3/fail		
+Cable Overhead Tricep Extension	4	25	3/fail		
+Standing Dumbbell Shoulder Press	4	15	3/fail		
+High Incline Dumbbell Press	4	25	3/fail		
+Dumbbell Shrug	4	55	3/fail		
+Parallel Pulldown	3	50	3/fail		
+Low Incline Dumbbell Press	3	40	3/fail		
