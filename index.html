@@ -160,7 +160,11 @@
                                exe = data[i].exercises[j];
                                html += "<div class='exe'>";
                                html += "<span class='kg'>" + exe.kg + "</span>";
-                               html += "<span class='name'>" + exe.name + "</span>";
+                               name = exe.name.replace("Medium Grip ", "");
+                               name = name.replace("Flat ", "");
+                               name = name.replace("Dumbbell ", "");
+                               name = name.replace("Overhead ", "");
+                               html += "<span class='name'>" + name + "</span>";
                                html += "<span class='sets' data-sets='" + exe.sets + "'>" + 0 + "/" + exe.sets + "</span>";
                                html += "</div>"
                             }
