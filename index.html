@@ -121,7 +121,7 @@
         <script>
             (function(){
                 let resp = null;
-                var options = { 'cycle': null, 'week': null };
+                var options = { 'modifier': 1, 'cycle': null, 'week': null };
                 var opts = JSON.parse(localStorage.getItem('options'));
                 if (opts != null) {
                     options = JSON.parse(localStorage.getItem('options'));
@@ -134,7 +134,7 @@
                 let timerInterval = null;
                 let rest = false;
                 let restStart = 0;
-                let restTime = 2*60;
+                let restTime = 2*60*options.modifier;
                 const print = function(s){console.log(s);}
 
                 const get_current_time = function()
@@ -277,7 +277,7 @@
                                 restTimer.setAttribute('data-sec', 0)
                                 restTimer.setAttribute('data-start', -1)
                                 rest = false;
-                                restTime = 2*60;
+                                restTime = 2*60*options.modifier;
                                 progress.classList.remove('compoundBG');
                                 restTimer.classList.remove('compoundColor');
                             }
@@ -333,7 +333,7 @@
 
                 const load_workout = function()
                 {
-                    console.log(options)
+                    print(options)
                     // Get workouts.json and call renderer
                     var xhr = new XMLHttpRequest();
                     xhr.onload = function()
@@ -343,8 +343,8 @@
                             main.innerHTML = "";
                             parse_workouts(data.workouts);
                         } else {
-                            console.log("failure");
-                            console.log(xhr.status);
+                            print("failure");
+                            print(xhr.status);
                         }
                     }
                     xhr.open('GET', 'cycle' + options.cycle + '/json/week' + options.week + '.json');
@@ -353,7 +353,9 @@
 
                 const start = function()
                 {
+                    print(options)
                     print("start")
+                    let modifier = 1;
                     if (options.cycle == null)
                     {
                         main.innerHTML = "";
@@ -363,20 +365,31 @@
                         const cycles = [1, 2];
                         for (var i=0; i<cycles.length; i++)
                         {
+                            modifier = 1;
                             switch(cycles[i])
                             {
                                 case 1:
                                     focus = "Hypertrophy";
+                                    reps = "6 - 20";
                                     break;
                                 case 2:
                                     focus = "Metabolite";
+                                    reps = "10 - 30";
+                                    modifier = 0.25;
                                     break;
                                 case 3:
                                     focus = "Resentization";
+                                    reps = "3 - 12";
                                     break;
                             }
                             html = "<div data-cycle='";
                             html += cycles[i];
+                            html += "' data-reps='";
+                            html += reps;
+                            html += "' data-mod='";
+                            html += modifier;
+                            html += "' data-focus='";
+                            html += focus;
                             html += "' class='focus'>";
                             html += focus + "cycle";
                             html += "</div>";
@@ -388,7 +401,10 @@
                             child = main.children[i];
                             child.addEventListener('click', function(event)
                             {
+                                options.reps = this.getAttribute('data-reps');
                                 options.cycle = this.getAttribute('data-cycle');
+                                options.focus = this.getAttribute('data-focus');
+                                options.modifier = this.getAttribute('data-mod');
                                 localStorage.setItem('options', JSON.stringify(options));
                                 change_week();
                             }, false);
@@ -402,10 +418,11 @@
 
                 const change_week = function()
                 {
+                    print(options)
                     if (options.week == null)
                     {
                         main.innerHTML = "";
-                        banner.innerHTML = "Weeks";
+                        banner.innerHTML = options.focus + " (" + options.reps + ")";
                         banner.classList.remove('workout');
                         // Create buttons for each focus (workout)
                         const weeks = [1, 2, 3, 4, 5];
@@ -431,6 +448,7 @@
                                 if (this.getAttribute('data-back'))
                                 {
                                     options.cycle = null;
+                                    options.modifier = 1;
                                     localStorage.setItem('options', JSON.stringify(options));
                                     start();
                                 }
@@ -451,7 +469,6 @@
 
 
             start();
-            print(options)
 
             // make banner work as "back" button
             banner.addEventListener('click', function(event)
@@ -476,7 +493,7 @@
 
             restTimer.addEventListener("click", function(event) {
                 event.preventDefault();
-                restTime = 5*60;
+                restTime = 5*60*options.modifier;
                 progress.classList.add('compoundBG');
                 restTimer.classList.add('compoundColor');
             },false);
